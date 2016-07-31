@@ -13,24 +13,9 @@ class App extends Component {
       whoLetGo: null,
       isRegistered: false,
       isSearching: false,
-      isHolding: false,
-      connectionNumber: 0
+      isHolding: false
     };
 
-    this.connection = socket();
-    this.connection.on('hold-has-started', (data) => this.setState({
-      nameOfFriend: data.name,
-      isSearching: false,
-      isHolding: true
-    }));
-
-    this.connection.on('hold-has-ended', (data) => this.setState({
-      isSearching: false,
-      isHolding: false,
-      whoLetGo: this.state.nameOfFriend,
-      nameOfFriend: null,
-      connectionNumber: this.state.connectionNumber + 1
-    }));
   }
 
   _updateName(e) {
@@ -45,19 +30,39 @@ class App extends Component {
     });
   }
   _onHold() {
+    this.connection = socket();
+
+    this.connection.on('hold-has-started', (data) => this.setState({
+      nameOfFriend: data.name,
+      isSearching: false,
+      isHolding: true
+    }));
+
+    this.connection.on('hold-has-ended', (data) => this.setState({
+      isSearching: false,
+      isHolding: false,
+      whoLetGo: this.state.nameOfFriend,
+      nameOfFriend: null,
+      connectionNumber: this.state.connectionNumber + 1
+    }), () => this.connection.emit('disconnect'));
     this.connection.emit('start-hold', {name: this.state.name});
+
     this.setState({
       isSearching: true
     });
   }
   _onUnhold() {
-    this.setState({
-      isSearching: false,
-      isHolding: false,
-      whoLetGo: this.state.nameOfFriend ? this.state.name : null,
-      nameOfFriend: null,
-      connectionNumber: this.state.connectionNumber + 1
-    }, () => this.connection.emit('end-hold', {name: this.state.name}));
+    if(this.state.isSearching || this.state.isHolding) {
+      this.setState({
+        isSearching: false,
+        isHolding: false,
+        whoLetGo: this.state.nameOfFriend ? this.state.name : null,
+        nameOfFriend: null
+      }, () => {
+        this.connection.emit('end-hold', {name: this.state.name});
+        this.connection.emit('disconnect');
+      });
+    }
   }
   render() {
     let events = {
@@ -85,7 +90,7 @@ class App extends Component {
           </form>
         }
         {this.state.isRegistered &&
-          <div className='main-button' key={this.state.connectionNumber} {...events}></div>
+          <div className='main-button' {...events}></div>
         }
       </div>
     );
