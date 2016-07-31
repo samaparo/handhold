@@ -1,3 +1,9 @@
-body {
-  background-color: blue;
+.app {
+
+}
+.app .main-button {
+  width: 100px;
+  height: 100px;
+  background-color: black;
+
 }
