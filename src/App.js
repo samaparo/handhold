@@ -1,18 +1,36 @@
 /*jshint esversion: 6 */
 import React, { Component } from 'react';
+import socket from 'socket.io-client';
 import './App.css';
 
 class App extends Component {
   constructor() {
     super();
+
     this.state = {
       name: '',
       nameOfFriend: null,
       whoLetGo: null,
       isRegistered: false,
       isSearching: false,
-      isHolding: false
+      isHolding: false,
+      connectionNumber: 0
     };
+
+    this.connection = socket();
+    this.connection.on('hold-has-started', (data) => this.setState({
+      nameOfFriend: data.name,
+      isSearching: false,
+      isHolding: true
+    }));
+
+    this.connection.on('hold-has-ended', (data) => this.setState({
+      isSearching: false,
+      isHolding: false,
+      whoLetGo: this.state.nameOfFriend,
+      nameOfFriend: null,
+      connectionNumber: this.state.connectionNumber + 1
+    }));
   }
 
   _updateName(e) {
@@ -27,6 +45,7 @@ class App extends Component {
     });
   }
   _onHold() {
+    this.connection.emit('start-hold', {name: this.state.name});
     this.setState({
       isSearching: true
     });
@@ -35,18 +54,18 @@ class App extends Component {
     this.setState({
       isSearching: false,
       isHolding: false,
-      whoLetGo: this.state.name
-    });
+      whoLetGo: this.state.nameOfFriend ? this.state.name : null,
+      nameOfFriend: null,
+      connectionNumber: this.state.connectionNumber + 1
+    }, () => this.connection.emit('end-hold', {name: this.state.name}));
   }
   render() {
-    let events = 'ontouchstart' in window ? {
-        onTouchStart: this._onHold.bind(this),
-        onTouchEnd: this._onUnhold.bind(this)
-      } :
-      {
-        onMouseDown: this._onHold.bind(this),
-        onMouseUp: this._onUnhold.bind(this)
-      };
+    let events = {
+      onTouchStart: this._onHold.bind(this),
+      onTouchEnd: this._onUnhold.bind(this),
+      onMouseDown: this._onHold.bind(this),
+      onMouseUp: this._onUnhold.bind(this)
+    };
     return (
       <div className="app">
         <p>
@@ -66,7 +85,7 @@ class App extends Component {
           </form>
         }
         {this.state.isRegistered &&
-          <div className='main-button' {...events}></div>
+          <div className='main-button' key={this.state.connectionNumber} {...events}></div>
         }
       </div>
     );
