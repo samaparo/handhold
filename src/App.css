@@ -1,9 +1,67 @@
-.app {
-  user-select: none;
-}
-.app .main-button {
-  width: 100px;
-  height: 100px;
+body {
   background-color: black;
-
 }
+
+.app {
+  color: white;
+  font-family: Helvetica;
+  user-select: none;
+  text-align: center;
+}
+.app h1 {
+  margin-bottom: 1em;
+  text-transform: uppercase;
+}
+.app p {
+  margin: 1em 10%;
+}
+.app input {
+  background-color: black;
+  border: none;
+  color: white;
+  border-bottom: solid 1px white;
+  font-size: 1.8em;
+  text-align: center;
+  text-transform: uppercase;
+  width: 9em;
+}
+.app button {
+  width: 4em;
+  font-size: 1.5em;
+  color: white;
+  border: solid 1px white;
+  background-color: black;
+  margin: 1em auto;
+  display: block;
+}
+
+.app .main-button {
+  width: 8em;
+  height: 8em;
+  margin: 2em auto;
+  background-color: white;
+  border-radius: 50%;
+}
+.app .main-button:after {
+  content: '';
+  width: 7em;
+  height: 7em;
+  margin: 5px auto;
+  display: inline-block;
+  border: solid 3px black;
+  border-radius: 50%;
+  transition: opacity .2s;
+}
+.app .main-button.spinning:after {
+  animation: 4s linear 0s infinite rotate;
+  border-style: dashed;
+}
+.app .main-button.breathing {
+  animation: .5s linear 0s infinite alternate breath;
+}
+.app .main-button.breathing:after {
+  opacity: 0;
+}
+
+@keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); }  }
+@keyframes breath { from { transform: scale(1, 1); background-color: white; } to { transform: scale(1.1, 1.1); background-color: pink;  }  }

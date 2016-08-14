@@ -73,24 +73,27 @@ class App extends Component {
     };
     return (
       <div className="app">
-        <p>
-        {
-          !this.state.isRegistered ?
-            'What\'s your name?' :
-            this.state.isSearching ? 'Searching for a friend...' :
-            this.state.isHolding ? 'Holding hands with ' + this.state.nameOfFriend + '...' :
-            this.state.whoLetGo ? (this.state.whoLetGo === this.state.name ? 'You' : this.state.whoLetGo) + ' let go. Press and hold the button to find a new friend.' :
-            'Press and hold the button below to hold hands with somebody. Hold on for as long as you want.'
+        {!this.state.isRegistered &&
+          <h1>What's your name?</h1>
         }
-        </p>
         {!this.state.isRegistered &&
           <form onSubmit={this._submitName.bind(this)}>
             <input type="text" name="name" value={this.state.name} onChange={this._updateName.bind(this)} />
-            <button>That's Me</button>
+            <button>GO</button>
           </form>
         }
         {this.state.isRegistered &&
-          <div className='main-button' {...events}></div>
+          <div className={'main-button ' + (this.state.isSearching ? 'spinning' : this.state.isHolding ? 'breathing' : '')} {...events}></div>
+        }
+        {this.state.isRegistered &&
+          <p>
+            {
+              this.state.isSearching ? 'Searching for a friend...' :
+              this.state.isHolding ? 'Holding hands with ' + this.state.nameOfFriend + '...' :
+              this.state.whoLetGo ? (this.state.whoLetGo === this.state.name ? 'You' : this.state.whoLetGo) + ' let go. Press and hold the button to find a new friend.' :
+              'Press and hold the button to hold hands with somebody. Hold on for as long as you want.'
+            }
+          </p>
         }
       </div>
     );
